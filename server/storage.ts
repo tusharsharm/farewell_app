@@ -1,7 +1,5 @@
 import { persons, type Person, type InsertPerson } from "@shared/schema";
 import { users, type User, type InsertUser } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -114,62 +112,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
-  }
-
-  async getAllPersons(): Promise<Person[]> {
-    return await db.select().from(persons);
-  }
-
-  async getPerson(id: number): Promise<Person | undefined> {
-    const [person] = await db.select().from(persons).where(eq(persons.id, id));
-    return person || undefined;
-  }
-
-  async createPerson(insertPerson: InsertPerson): Promise<Person> {
-    const [person] = await db
-      .insert(persons)
-      .values(insertPerson)
-      .returning();
-    return person;
-  }
-
-  async updatePerson(id: number, updateData: Partial<InsertPerson>): Promise<Person | undefined> {
-    const [person] = await db
-      .update(persons)
-      .set(updateData)
-      .where(eq(persons.id, id))
-      .returning();
-    return person || undefined;
-  }
-
-  async deletePerson(id: number): Promise<boolean> {
-    const result = await db
-      .delete(persons)
-      .where(eq(persons.id, id))
-      .returning();
-    return result.length > 0;
-  }
-}
-
-// Use DatabaseStorage for persistent storage
-export const storage = new DatabaseStorage();
-
-// For reference or fallback to in-memory storage:
-// export const storage = new MemStorage();
+export const storage = new MemStorage();
