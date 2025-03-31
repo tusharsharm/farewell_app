@@ -11,6 +11,7 @@ const __dirname = dirname(__filename);
 export default defineConfig({
   plugins: [
     react(),
+    base: './',
     runtimeErrorOverlay(),
     themePlugin(),
     ...(process.env.NODE_ENV !== "production" &&
